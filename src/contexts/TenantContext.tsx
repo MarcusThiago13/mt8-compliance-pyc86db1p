@@ -19,10 +19,11 @@ export interface TenantState {
   publicRelationship: boolean
   areas: string[]
   accessProfile: AccessProfile
+  isoProfileData?: Record<string, any>
 }
 
 interface TenantContextData {
-  tenant: TenantState
+  tenant: TenantState | null
   tenants: TenantState[]
   activeTracks: Track[]
   isSuperAdmin: boolean
@@ -32,36 +33,12 @@ interface TenantContextData {
   getActiveTracksFor: (tenant: Partial<TenantState>) => Track[]
 }
 
-const defaultTenants: TenantState[] = [
-  {
-    id: 't-123',
-    name: 'Escola Esperança (OSC)',
-    nature: 'osc',
-    publicRelationship: true,
-    areas: ['education'],
-    accessProfile: 'A',
-  },
-  {
-    id: 't-456',
-    name: 'Tech Solutions SA',
-    nature: 'private',
-    publicRelationship: false,
-    areas: ['tech'],
-    accessProfile: 'B',
-  },
-  {
-    id: 't-789',
-    name: 'Prefeitura Municipal',
-    nature: 'public',
-    publicRelationship: true,
-    areas: ['health', 'education'],
-    accessProfile: 'C',
-  },
-]
+const defaultTenants: TenantState[] = []
 
 const TenantContext = createContext<TenantContextData | undefined>(undefined)
 
-export function getActiveTracks(tenant: Partial<TenantState>): Track[] {
+export function getActiveTracks(tenant: Partial<TenantState> | null): Track[] {
+  if (!tenant) return []
   const tracks: Track[] = ['iso-core']
   if (tenant.nature === 'osc') tracks.push('osc-track')
   if (tenant.publicRelationship || tenant.nature === 'public') tracks.push('public-contracts')
@@ -75,13 +52,13 @@ export function getActiveTracks(tenant: Partial<TenantState>): Track[] {
 
 export function TenantProvider({ children }: { children: ReactNode }) {
   const [tenants, setTenants] = useState<TenantState[]>(defaultTenants)
-  const [currentTenantId, setCurrentTenantId] = useState<string>(defaultTenants[0].id)
+  const [currentTenantId, setCurrentTenantId] = useState<string | null>(null)
 
   // Set to true to satisfy the super admin requirement logic locally
   const isSuperAdmin = true
 
   const tenant = useMemo(
-    () => tenants.find((t) => t.id === currentTenantId) || tenants[0],
+    () => tenants.find((t) => t.id === currentTenantId) || tenants[0] || null,
     [tenants, currentTenantId],
   )
 
