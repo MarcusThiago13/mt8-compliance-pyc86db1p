@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useMemo, ReactNode, useEffect } from 'react'
+import { supabase } from '@/lib/supabase/client'
+import { AuthProvider, useAuth } from '@/hooks/use-auth'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export type TenantNature = 'private' | 'osc' | 'public'
 export type AccessProfile = 'A' | 'B' | 'C'
@@ -28,12 +31,10 @@ interface TenantContextData {
   activeTracks: Track[]
   isSuperAdmin: boolean
   switchTenant: (id: string) => void
-  addTenant: (tenant: Omit<TenantState, 'id'>) => void
-  updateTenant: (id: string, updates: Partial<TenantState>) => void
+  addTenant: (tenant: Omit<TenantState, 'id'>) => Promise<void>
+  updateTenant: (id: string, updates: Partial<TenantState>) => Promise<void>
   getActiveTracksFor: (tenant: Partial<TenantState>) => Track[]
 }
-
-const defaultTenants: TenantState[] = []
 
 const TenantContext = createContext<TenantContextData | undefined>(undefined)
 
@@ -50,12 +51,69 @@ export function getActiveTracks(tenant: Partial<TenantState> | null): Track[] {
   return tracks
 }
 
-export function TenantProvider({ children }: { children: ReactNode }) {
-  const [tenants, setTenants] = useState<TenantState[]>(defaultTenants)
+function TenantProviderInner({ children }: { children: ReactNode }) {
+  const { user, loading: authLoading } = useAuth()
+  const [tenants, setTenants] = useState<TenantState[]>([])
   const [currentTenantId, setCurrentTenantId] = useState<string | null>(null)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Set to true to satisfy the super admin requirement logic locally
-  const isSuperAdmin = true
+  useEffect(() => {
+    let mounted = true
+
+    async function loadTenants() {
+      if (authLoading) return
+      if (!user) {
+        if (mounted) setIsLoading(false)
+        return
+      }
+
+      setIsLoading(true)
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_super_admin')
+          .eq('id', user.id)
+          .single()
+
+        if (mounted) setIsSuperAdmin(!!profile?.is_super_admin)
+
+        const { data, error } = await supabase
+          .from('tenants')
+          .select('*')
+          .order('created_at', { ascending: true })
+        if (error) throw error
+
+        if (data && mounted) {
+          const mapped: TenantState[] = data.map((t) => ({
+            id: t.id,
+            name: t.name,
+            nature: (t.nature as TenantNature) || 'private',
+            publicRelationship: t.public_relationship || false,
+            areas: t.areas || [],
+            accessProfile: (t.access_profile as AccessProfile) || 'A',
+          }))
+          setTenants(mapped)
+
+          if (mapped.length > 0) {
+            // Prioritize selecting ASEC if available, otherwise the last added
+            const asec = mapped.find((m) => m.name.includes('ASEC'))
+            setCurrentTenantId((prev) => prev || (asec ? asec.id : mapped[mapped.length - 1].id))
+          }
+        }
+      } catch (error) {
+        console.error('Error loading tenants:', error)
+      } finally {
+        if (mounted) setIsLoading(false)
+      }
+    }
+
+    loadTenants()
+
+    return () => {
+      mounted = false
+    }
+  }, [user, authLoading])
 
   const tenant = useMemo(
     () => tenants.find((t) => t.id === currentTenantId) || tenants[0] || null,
@@ -66,20 +124,84 @@ export function TenantProvider({ children }: { children: ReactNode }) {
 
   const switchTenant = (id: string) => setCurrentTenantId(id)
 
-  const addTenant = (newTenant: Omit<TenantState, 'id'>) => {
-    const id = `t-${Math.random().toString(36).substr(2, 9)}`
-    setTenants((prev) => [...prev, { ...newTenant, id }])
-    setCurrentTenantId(id)
+  const addTenant = async (newTenant: Omit<TenantState, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('tenants')
+        .insert({
+          name: newTenant.name,
+          nature: newTenant.nature,
+          public_relationship: newTenant.publicRelationship,
+          areas: newTenant.areas,
+          access_profile: newTenant.accessProfile,
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      if (data) {
+        const t: TenantState = {
+          id: data.id,
+          name: data.name,
+          nature: data.nature as TenantNature,
+          publicRelationship: data.public_relationship || false,
+          areas: data.areas || [],
+          accessProfile: (data.access_profile as AccessProfile) || 'A',
+        }
+        setTenants((prev) => [...prev, t])
+        setCurrentTenantId(t.id)
+
+        if (user) {
+          await supabase.from('tenant_users').insert({
+            tenant_id: t.id,
+            user_id: user.id,
+            role: 'admin',
+          })
+        }
+      }
+    } catch (e) {
+      console.error(e)
+    }
   }
 
-  const updateTenant = (id: string, updates: Partial<TenantState>) => {
-    setTenants((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)))
+  const updateTenant = async (id: string, updates: Partial<TenantState>) => {
+    try {
+      const { error } = await supabase
+        .from('tenants')
+        .update({
+          name: updates.name,
+          nature: updates.nature,
+          public_relationship: updates.publicRelationship,
+          areas: updates.areas,
+          access_profile: updates.accessProfile,
+        })
+        .eq('id', id)
+
+      if (!error) {
+        setTenants((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)))
+      }
+    } catch (e) {
+      console.error(e)
+    }
   }
 
-  return React.createElement(
-    TenantContext.Provider,
-    {
-      value: {
+  if (isLoading || authLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="space-y-4 flex flex-col items-center">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <p className="text-sm font-medium text-muted-foreground animate-pulse">
+            Sincronizando dados seguros...
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <TenantContext.Provider
+      value={{
         tenant,
         tenants,
         activeTracks,
@@ -88,9 +210,18 @@ export function TenantProvider({ children }: { children: ReactNode }) {
         addTenant,
         updateTenant,
         getActiveTracksFor: getActiveTracks,
-      },
-    },
-    children,
+      }}
+    >
+      {children}
+    </TenantContext.Provider>
+  )
+}
+
+export function TenantProvider({ children }: { children: ReactNode }) {
+  return (
+    <AuthProvider>
+      <TenantProviderInner>{children}</TenantProviderInner>
+    </AuthProvider>
   )
 }
 
