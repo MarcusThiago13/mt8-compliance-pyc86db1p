@@ -29,11 +29,13 @@ export function Header() {
     return 'Página'
   }
 
-  const badgeColor = {
-    private: 'bg-blue-100 text-blue-800 hover:bg-blue-100',
-    osc: 'bg-purple-100 text-purple-800 hover:bg-purple-100',
-    public: 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100',
-  }[tenant.nature]
+  const badgeColor = tenant
+    ? {
+        private: 'bg-blue-100 text-blue-800 hover:bg-blue-100',
+        osc: 'bg-purple-100 text-purple-800 hover:bg-purple-100',
+        public: 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100',
+      }[tenant.nature]
+    : ''
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b bg-background px-4 shadow-sm">
@@ -64,11 +66,16 @@ export function Header() {
           />
         </div>
 
-        {!location.pathname.startsWith('/admin') && (
-          <Badge variant="secondary" className={badgeColor}>
-            {tenant.name}
-          </Badge>
-        )}
+        {!location.pathname.startsWith('/admin') &&
+          (tenant ? (
+            <Badge variant="secondary" className={badgeColor}>
+              {tenant.name}
+            </Badge>
+          ) : (
+            <Badge variant="secondary" className="bg-muted text-muted-foreground hover:bg-muted">
+              Nenhum cliente
+            </Badge>
+          ))}
 
         <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-transparent transition-all hover:ring-primary">
           <AvatarImage

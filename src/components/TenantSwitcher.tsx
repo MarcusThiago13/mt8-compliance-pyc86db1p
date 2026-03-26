@@ -27,7 +27,9 @@ export function TenantSwitcher() {
             <Building className="size-4" />
           </div>
           <div className="flex flex-col gap-0.5 leading-none">
-            <span className="font-semibold text-sm truncate">{tenant.name}</span>
+            <span className="font-semibold text-sm truncate">
+              {tenant ? tenant.name : 'Nenhum cliente selecionado'}
+            </span>
             <span className="text-xs text-muted-foreground truncate">Super Admin Access</span>
           </div>
           <ChevronsUpDown className="ml-auto size-4 shrink-0 opacity-50" />
@@ -42,16 +44,22 @@ export function TenantSwitcher() {
         <DropdownMenuLabel className="text-xs text-muted-foreground">
           Trocar Workspace (Tenants)
         </DropdownMenuLabel>
-        {tenants.map((t) => (
-          <DropdownMenuItem
-            key={t.id}
-            onClick={() => switchTenant(t.id)}
-            className="gap-2 cursor-pointer"
-          >
-            {t.id === tenant.id ? <Check className="size-4" /> : <div className="size-4" />}
-            <span className="truncate">{t.name}</span>
-          </DropdownMenuItem>
-        ))}
+        {tenants.length > 0 ? (
+          tenants.map((t) => (
+            <DropdownMenuItem
+              key={t.id}
+              onClick={() => switchTenant(t.id)}
+              className="gap-2 cursor-pointer"
+            >
+              {t.id === tenant?.id ? <Check className="size-4" /> : <div className="size-4" />}
+              <span className="truncate">{t.name}</span>
+            </DropdownMenuItem>
+          ))
+        ) : (
+          <div className="px-2 py-3 text-center text-sm text-muted-foreground">
+            Lista de clientes vazia
+          </div>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="gap-2 cursor-pointer">
           <Link to="/admin">

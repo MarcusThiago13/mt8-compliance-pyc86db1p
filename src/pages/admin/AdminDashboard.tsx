@@ -61,9 +61,9 @@ export default function AdminDashboard() {
           {tenants.length === 0 ? (
             <div className="text-center py-12 bg-muted/20 rounded-lg border border-dashed">
               <Building2 className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-semibold">Nenhum cliente cadastrado</h3>
+              <h3 className="text-lg font-semibold">Nenhum cliente cadastrado ainda.</h3>
               <p className="text-muted-foreground mt-1 mb-4">
-                Comece adicionando seu primeiro cliente para provisionar um ambiente.
+                Clique em Novo Cliente para começar.
               </p>
               <Button asChild>
                 <Link to="/admin/novo-cliente">
