@@ -1,7 +1,16 @@
 import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react'
 
 export type TenantNature = 'private' | 'osc' | 'public'
-export type Track = 'iso-core' | 'osc-track' | 'public-contracts' | 'lgpd-education'
+export type AccessProfile = 'A' | 'B' | 'C'
+export type Track =
+  | 'iso-core'
+  | 'osc-track'
+  | 'public-contracts'
+  | 'lgpd-education'
+  | 'health-track'
+  | 'social-track'
+  | 'culture-track'
+  | 'environment-track'
 
 export interface TenantState {
   id: string
@@ -9,42 +18,101 @@ export interface TenantState {
   nature: TenantNature
   publicRelationship: boolean
   areas: string[]
+  accessProfile: AccessProfile
 }
 
 interface TenantContextData {
   tenant: TenantState
+  tenants: TenantState[]
   activeTracks: Track[]
-  updateTenant: (updates: Partial<TenantState>) => void
+  isSuperAdmin: boolean
+  switchTenant: (id: string) => void
+  addTenant: (tenant: Omit<TenantState, 'id'>) => void
+  updateTenant: (id: string, updates: Partial<TenantState>) => void
+  getActiveTracksFor: (tenant: Partial<TenantState>) => Track[]
 }
 
-const defaultTenant: TenantState = {
-  id: 't-123',
-  name: 'Escola Esperança (OSC)',
-  nature: 'osc',
-  publicRelationship: true,
-  areas: ['education'],
-}
+const defaultTenants: TenantState[] = [
+  {
+    id: 't-123',
+    name: 'Escola Esperança (OSC)',
+    nature: 'osc',
+    publicRelationship: true,
+    areas: ['education'],
+    accessProfile: 'A',
+  },
+  {
+    id: 't-456',
+    name: 'Tech Solutions SA',
+    nature: 'private',
+    publicRelationship: false,
+    areas: ['tech'],
+    accessProfile: 'B',
+  },
+  {
+    id: 't-789',
+    name: 'Prefeitura Municipal',
+    nature: 'public',
+    publicRelationship: true,
+    areas: ['health', 'education'],
+    accessProfile: 'C',
+  },
+]
 
 const TenantContext = createContext<TenantContextData | undefined>(undefined)
 
+export function getActiveTracks(tenant: Partial<TenantState>): Track[] {
+  const tracks: Track[] = ['iso-core']
+  if (tenant.nature === 'osc') tracks.push('osc-track')
+  if (tenant.publicRelationship || tenant.nature === 'public') tracks.push('public-contracts')
+  if (tenant.areas?.includes('education')) tracks.push('lgpd-education')
+  if (tenant.areas?.includes('health')) tracks.push('health-track')
+  if (tenant.areas?.includes('social')) tracks.push('social-track')
+  if (tenant.areas?.includes('culture')) tracks.push('culture-track')
+  if (tenant.areas?.includes('environment')) tracks.push('environment-track')
+  return tracks
+}
+
 export function TenantProvider({ children }: { children: ReactNode }) {
-  const [tenant, setTenant] = useState<TenantState>(defaultTenant)
+  const [tenants, setTenants] = useState<TenantState[]>(defaultTenants)
+  const [currentTenantId, setCurrentTenantId] = useState<string>(defaultTenants[0].id)
 
-  const activeTracks = useMemo<Track[]>(() => {
-    const tracks: Track[] = ['iso-core']
-    if (tenant.nature === 'osc') tracks.push('osc-track')
-    if (tenant.publicRelationship || tenant.nature === 'public') tracks.push('public-contracts')
-    if (tenant.areas.includes('education')) tracks.push('lgpd-education')
-    return tracks
-  }, [tenant])
+  // Set to true to satisfy the super admin requirement logic locally
+  const isSuperAdmin = true
 
-  const updateTenant = (updates: Partial<TenantState>) => {
-    setTenant((prev) => ({ ...prev, ...updates }))
+  const tenant = useMemo(
+    () => tenants.find((t) => t.id === currentTenantId) || tenants[0],
+    [tenants, currentTenantId],
+  )
+
+  const activeTracks = useMemo<Track[]>(() => getActiveTracks(tenant), [tenant])
+
+  const switchTenant = (id: string) => setCurrentTenantId(id)
+
+  const addTenant = (newTenant: Omit<TenantState, 'id'>) => {
+    const id = `t-${Math.random().toString(36).substr(2, 9)}`
+    setTenants((prev) => [...prev, { ...newTenant, id }])
+    setCurrentTenantId(id)
+  }
+
+  const updateTenant = (id: string, updates: Partial<TenantState>) => {
+    setTenants((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)))
   }
 
   return React.createElement(
     TenantContext.Provider,
-    { value: { tenant, activeTracks, updateTenant } },
+    {
+      value: {
+        tenant,
+        tenants,
+        activeTracks,
+        isSuperAdmin,
+        switchTenant,
+        addTenant,
+        updateTenant,
+        getActiveTracksFor: getActiveTracks,
+      },
+    },
     children,
   )
 }

@@ -8,6 +8,9 @@ import TenantManagement from './pages/TenantManagement'
 import TrackModule from './pages/TrackModule'
 import LogsPrivacy from './pages/LogsPrivacy'
 import NotFound from './pages/NotFound'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import NewClientWizard from './pages/admin/NewClientWizard'
+import ClientProfile from './pages/admin/ClientProfile'
 
 const App = () => (
   <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
@@ -20,6 +23,11 @@ const App = () => (
           <Route path="/settings" element={<TenantManagement />} />
           <Route path="/track/:trackId" element={<TrackModule />} />
           <Route path="/logs" element={<LogsPrivacy />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/novo-cliente" element={<NewClientWizard />} />
+          <Route path="/admin/clientes/:id" element={<ClientProfile />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

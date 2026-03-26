@@ -23,6 +23,9 @@ export function Header() {
     if (location.pathname === '/settings') return 'Configurações'
     if (location.pathname === '/logs') return 'Logs & Privacidade'
     if (location.pathname.startsWith('/track/')) return 'Trilha de Compliance'
+    if (location.pathname.startsWith('/admin/novo-cliente')) return 'Novo Cliente'
+    if (location.pathname.startsWith('/admin/clientes/')) return 'Editar Cliente'
+    if (location.pathname === '/admin') return 'Portal Super Admin'
     return 'Página'
   }
 
@@ -56,14 +59,16 @@ export function Header() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Buscar evidências..."
+            placeholder="Buscar..."
             className="w-full bg-muted/50 pl-9 border-none focus-visible:ring-1"
           />
         </div>
 
-        <Badge variant="secondary" className={badgeColor}>
-          {tenant.name}
-        </Badge>
+        {!location.pathname.startsWith('/admin') && (
+          <Badge variant="secondary" className={badgeColor}>
+            {tenant.name}
+          </Badge>
+        )}
 
         <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-transparent transition-all hover:ring-primary">
           <AvatarImage
