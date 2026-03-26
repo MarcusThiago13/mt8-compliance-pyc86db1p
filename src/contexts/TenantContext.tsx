@@ -85,13 +85,14 @@ function TenantProviderInner({ children }: { children: ReactNode }) {
         if (error) throw error
 
         if (data && mounted) {
-          const mapped: TenantState[] = data.map((t) => ({
+          const mapped: TenantState[] = data.map((t: any) => ({
             id: t.id,
             name: t.name,
             nature: (t.nature as TenantNature) || 'private',
             publicRelationship: t.public_relationship || false,
             areas: t.areas || [],
             accessProfile: (t.access_profile as AccessProfile) || 'A',
+            isoProfileData: t.iso_profile_data || {},
           }))
           setTenants(mapped)
 
@@ -126,17 +127,19 @@ function TenantProviderInner({ children }: { children: ReactNode }) {
 
   const addTenant = async (newTenant: Omit<TenantState, 'id'>) => {
     try {
-      const { data, error } = await supabase
-        .from('tenants')
-        .insert({
-          name: newTenant.name,
-          nature: newTenant.nature,
-          public_relationship: newTenant.publicRelationship,
-          areas: newTenant.areas,
-          access_profile: newTenant.accessProfile,
-        })
-        .select()
-        .single()
+      const payload: any = {
+        name: newTenant.name,
+        nature: newTenant.nature,
+        public_relationship: newTenant.publicRelationship,
+        areas: newTenant.areas,
+        access_profile: newTenant.accessProfile,
+      }
+
+      if (newTenant.isoProfileData) {
+        payload.iso_profile_data = newTenant.isoProfileData
+      }
+
+      const { data, error } = await supabase.from('tenants').insert(payload).select().single()
 
       if (error) throw error
 
@@ -148,6 +151,7 @@ function TenantProviderInner({ children }: { children: ReactNode }) {
           publicRelationship: data.public_relationship || false,
           areas: data.areas || [],
           accessProfile: (data.access_profile as AccessProfile) || 'A',
+          isoProfileData: (data as any).iso_profile_data || {},
         }
         setTenants((prev) => [...prev, t])
         setCurrentTenantId(t.id)
@@ -167,19 +171,24 @@ function TenantProviderInner({ children }: { children: ReactNode }) {
 
   const updateTenant = async (id: string, updates: Partial<TenantState>) => {
     try {
-      const { error } = await supabase
-        .from('tenants')
-        .update({
-          name: updates.name,
-          nature: updates.nature,
-          public_relationship: updates.publicRelationship,
-          areas: updates.areas,
-          access_profile: updates.accessProfile,
-        })
-        .eq('id', id)
+      const payload: any = {}
+      if (updates.name !== undefined) payload.name = updates.name
+      if (updates.nature !== undefined) payload.nature = updates.nature
+      if (updates.publicRelationship !== undefined)
+        payload.public_relationship = updates.publicRelationship
+      if (updates.areas !== undefined) payload.areas = updates.areas
+      if (updates.accessProfile !== undefined) payload.access_profile = updates.accessProfile
+
+      if (updates.isoProfileData !== undefined) {
+        payload.iso_profile_data = updates.isoProfileData
+      }
+
+      const { error } = await supabase.from('tenants').update(payload).eq('id', id)
 
       if (!error) {
         setTenants((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)))
+      } else {
+        throw error
       }
     } catch (e) {
       console.error(e)

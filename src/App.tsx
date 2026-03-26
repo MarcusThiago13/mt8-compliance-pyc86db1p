@@ -5,6 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import Layout from './components/Layout'
 import Index from './pages/Index'
 import TenantManagement from './pages/TenantManagement'
+import OrganizationProfile from './pages/OrganizationProfile'
 import TrackModule from './pages/TrackModule'
 import LogsPrivacy from './pages/LogsPrivacy'
 import Documents from './pages/Documents'
@@ -22,6 +23,7 @@ const App = () => (
         <Route element={<Layout />}>
           <Route path="/" element={<Index />} />
           <Route path="/settings" element={<TenantManagement />} />
+          <Route path="/perfil" element={<OrganizationProfile />} />
           <Route path="/track/:trackId" element={<TrackModule />} />
           <Route path="/logs" element={<LogsPrivacy />} />
           <Route path="/docs" element={<Documents />} />

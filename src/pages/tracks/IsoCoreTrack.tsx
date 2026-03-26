@@ -22,9 +22,11 @@ import {
   History,
   FileText,
   CheckCircle2,
+  Zap,
 } from 'lucide-react'
 import { SensitiveData } from '@/components/SensitiveData'
 import { useToast } from '@/hooks/use-toast'
+import { useTenant } from '@/contexts/TenantContext'
 
 const ISO_ITEMS = [
   '4.1 Entendimento da organização e de seu contexto',
@@ -57,6 +59,10 @@ const ISO_ITEMS = [
 
 export default function IsoCoreTrack() {
   const { toast } = useToast()
+  const { tenant } = useTenant()
+
+  const profile = tenant?.isoProfileData || {}
+  const hasProfile = !!profile.profileComplete
 
   const handleUpload = () => {
     toast({
@@ -143,6 +149,95 @@ export default function IsoCoreTrack() {
                           de maturidade da organização no que tange a cláusula normativa{' '}
                           <strong>{item}</strong>.
                         </div>
+
+                        {/* AUTO-FILL SECTIONS */}
+                        {idx === 0 && hasProfile && (
+                          <div className="bg-primary/5 p-4 rounded-md border border-primary/20 mt-4 animate-fade-in">
+                            <h4 className="font-medium text-primary text-sm flex items-center gap-2 mb-3">
+                              <Zap className="size-4" /> Dados sincronizados via Perfil da
+                              Organização
+                            </h4>
+                            <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <span className="text-muted-foreground block text-xs">
+                                  Razão Social
+                                </span>
+                                <strong>{profile.razaoSocial}</strong>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground block text-xs">
+                                  Natureza
+                                </span>
+                                <strong className="uppercase">{tenant?.nature}</strong>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground block text-xs">
+                                  Fundação
+                                </span>
+                                <strong>{profile.dataFundacao || '-'}</strong>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {idx === 2 && hasProfile && profile.escopoGestao && (
+                          <div className="bg-primary/5 p-4 rounded-md border border-primary/20 mt-4 animate-fade-in">
+                            <h4 className="font-medium text-primary text-sm flex items-center gap-2 mb-3">
+                              <Zap className="size-4" /> Escopo do Sistema (Sincronizado)
+                            </h4>
+                            <p className="text-sm bg-background/50 p-2 rounded border border-primary/10">
+                              {profile.escopoGestao}
+                            </p>
+                          </div>
+                        )}
+                        {idx === 4 && hasProfile && (
+                          <div className="bg-primary/5 p-4 rounded-md border border-primary/20 mt-4 animate-fade-in">
+                            <h4 className="font-medium text-primary text-sm flex items-center gap-2 mb-3">
+                              <Zap className="size-4" /> Liderança Sincronizada
+                            </h4>
+                            <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <span className="text-muted-foreground block text-xs">
+                                  Representante Legal
+                                </span>
+                                <strong>
+                                  {profile.repNome || '-'}{' '}
+                                  {profile.repCargo ? `(${profile.repCargo})` : ''}
+                                </strong>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground block text-xs">
+                                  Responsável Compliance
+                                </span>
+                                <strong>{profile.compNome || '-'}</strong>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {idx === 8 && hasProfile && (
+                          <div className="bg-primary/5 p-4 rounded-md border border-primary/20 mt-4 animate-fade-in">
+                            <h4 className="font-medium text-primary text-sm flex items-center gap-2 mb-3">
+                              <Zap className="size-4" /> Papéis e Responsabilidades Sincronizados
+                            </h4>
+                            <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <span className="text-muted-foreground block text-xs">
+                                  Órgão Diretivo
+                                </span>
+                                <strong>
+                                  {Array.isArray(profile.diretoria) && profile.diretoria.length > 0
+                                    ? profile.diretoria.map((d: any) => d.nome).join(', ')
+                                    : '-'}
+                                </strong>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground block text-xs">
+                                  Compliance Officer
+                                </span>
+                                <strong>{profile.complianceOfficer || 'Não designado'}</strong>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         <div className="grid sm:grid-cols-2 gap-6 pt-2">
                           <div className="space-y-2">

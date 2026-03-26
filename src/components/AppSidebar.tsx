@@ -143,8 +143,17 @@ export function AppSidebar() {
             </SidebarGroup>
 
             <SidebarGroup className="mt-auto">
+              <SidebarGroupLabel>Administração Local</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={location.pathname === '/perfil'}>
+                      <Link to="/perfil">
+                        <Building />
+                        <span>Perfil da Organização</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={location.pathname === '/settings'}>
                       <Link to="/settings">
