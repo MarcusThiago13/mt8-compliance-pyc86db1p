@@ -3,9 +3,104 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { ProgressChart } from '@/components/dashboard/ProgressChart'
 import { AlertCircle, Clock, ShieldAlert } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const Index = () => {
   const { tenant, activeTracks } = useTenant()
+
+  // Guard clause para evitar erro ao acessar propriedades de null antes do carregamento
+  if (!tenant) {
+    return (
+      <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-9 w-[300px]" />
+          <Skeleton className="h-5 w-[400px]" />
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* Classification Summary Skeleton */}
+          <Card className="md:col-span-2 bg-gradient-to-br from-card to-muted/30 shadow-subtle border-border/50">
+            <CardHeader>
+              <Skeleton className="h-6 w-48 mb-2" />
+              <Skeleton className="h-4 w-64" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-6">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-5 w-24" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-5 w-16" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Progress Overview Skeleton */}
+          <Card className="shadow-subtle border-border/50">
+            <CardHeader className="pb-2">
+              <Skeleton className="h-6 w-32" />
+            </CardHeader>
+            <CardContent className="flex flex-col items-center justify-center pb-6">
+              <Skeleton className="h-[150px] w-[150px] rounded-full my-2" />
+              <Skeleton className="h-8 w-16 mt-4" />
+              <Skeleton className="h-3 w-32 mt-2" />
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Action Center Skeleton */}
+          <Card className="shadow-subtle border-border/50">
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between border-b border-border/50 pb-4 last:border-0 last:pb-0"
+                >
+                  <div className="space-y-2 w-full">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/3" />
+                  </div>
+                  <Skeleton className="h-5 w-16 rounded-full shrink-0 ml-4" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Recent Logs Skeleton */}
+          <Card className="shadow-subtle border-border/50">
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <Skeleton className="h-4 w-4 rounded-sm mt-1" />
+                  <div className="space-y-2 w-full">
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-3 w-1/4" />
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
