@@ -12,6 +12,9 @@ import {
   Users,
   Globe,
   Leaf,
+  BookOpenCheck,
+  Baby,
+  HeartHandshake,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -31,7 +34,10 @@ const TRACK_LABELS: Record<string, { label: string; icon: any }> = {
   'iso-core': { label: 'ISO Core 37001/37301', icon: ShieldCheck },
   'osc-track': { label: 'Módulo OSC', icon: Building },
   'public-contracts': { label: 'Contratos Públicos', icon: Building2 },
+  'edu-compliance': { label: 'Conform. Educacional', icon: BookOpenCheck },
+  'edu-eca': { label: 'Proteção Infantil (ECA)', icon: Baby },
   'lgpd-education': { label: 'LGPD Escolar', icon: GraduationCap },
+  'edu-inclusive': { label: 'Educação Inclusiva', icon: HeartHandshake },
   'health-track': { label: 'Trilha Saúde', icon: HeartPulse },
   'social-track': { label: 'Assistência Social', icon: Users },
   'culture-track': { label: 'Cultura', icon: Globe },

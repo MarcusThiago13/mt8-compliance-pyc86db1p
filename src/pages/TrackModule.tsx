@@ -3,17 +3,20 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { Info } from 'lucide-react'
 import IsoCoreTrack from './tracks/IsoCoreTrack'
 import OscTrack from './tracks/OscTrack'
+import EduComplianceTrack from './tracks/EduComplianceTrack'
+import EduEcaTrack from './tracks/EduEcaTrack'
+import EduLgpdTrack from './tracks/EduLgpdTrack'
+import EduInclusiveTrack from './tracks/EduInclusiveTrack'
 
 export default function TrackModule() {
   const { trackId } = useParams()
 
-  if (trackId === 'iso-core') {
-    return <IsoCoreTrack />
-  }
-
-  if (trackId === 'osc-track') {
-    return <OscTrack />
-  }
+  if (trackId === 'iso-core') return <IsoCoreTrack />
+  if (trackId === 'osc-track') return <OscTrack />
+  if (trackId === 'edu-compliance') return <EduComplianceTrack />
+  if (trackId === 'edu-eca') return <EduEcaTrack />
+  if (trackId === 'lgpd-education') return <EduLgpdTrack />
+  if (trackId === 'edu-inclusive') return <EduInclusiveTrack />
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">

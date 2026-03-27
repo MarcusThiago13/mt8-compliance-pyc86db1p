@@ -9,7 +9,10 @@ export type Track =
   | 'iso-core'
   | 'osc-track'
   | 'public-contracts'
+  | 'edu-compliance'
+  | 'edu-eca'
   | 'lgpd-education'
+  | 'edu-inclusive'
   | 'health-track'
   | 'social-track'
   | 'culture-track'
@@ -43,7 +46,11 @@ export function getActiveTracks(tenant: Partial<TenantState> | null): Track[] {
   const tracks: Track[] = ['iso-core']
   if (tenant.nature === 'osc') tracks.push('osc-track')
   if (tenant.publicRelationship || tenant.nature === 'public') tracks.push('public-contracts')
-  if (tenant.areas?.includes('education')) tracks.push('lgpd-education')
+
+  if (tenant.areas?.includes('education')) {
+    tracks.push('edu-compliance', 'edu-eca', 'lgpd-education', 'edu-inclusive')
+  }
+
   if (tenant.areas?.includes('health')) tracks.push('health-track')
   if (tenant.areas?.includes('social')) tracks.push('social-track')
   if (tenant.areas?.includes('culture')) tracks.push('culture-track')
@@ -97,7 +104,6 @@ function TenantProviderInner({ children }: { children: ReactNode }) {
           setTenants(mapped)
 
           if (mapped.length > 0) {
-            // Prioritize selecting ASEC if available, otherwise the last added
             const asec = mapped.find((m) => m.name.includes('ASEC'))
             setCurrentTenantId((prev) => prev || (asec ? asec.id : mapped[mapped.length - 1].id))
           }
