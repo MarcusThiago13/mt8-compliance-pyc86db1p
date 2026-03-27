@@ -157,24 +157,22 @@ export default function IsoCoreTrack() {
                               <Zap className="size-4" /> Dados sincronizados via Perfil da
                               Organização
                             </h4>
-                            <div className="grid sm:grid-cols-2 gap-4 text-sm">
-                              <div>
+                            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                              <div className="md:col-span-2">
                                 <span className="text-muted-foreground block text-xs">
                                   Razão Social
                                 </span>
-                                <strong>{profile.razaoSocial}</strong>
+                                <strong>{profile.razaoSocial || '-'}</strong>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground block text-xs">CNPJ</span>
+                                <strong>{profile.cnpj || '-'}</strong>
                               </div>
                               <div>
                                 <span className="text-muted-foreground block text-xs">
                                   Natureza
                                 </span>
-                                <strong className="uppercase">{tenant?.nature}</strong>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground block text-xs">
-                                  Fundação
-                                </span>
-                                <strong>{profile.dataFundacao || '-'}</strong>
+                                <strong className="uppercase">{tenant?.nature || '-'}</strong>
                               </div>
                             </div>
                           </div>
@@ -184,7 +182,7 @@ export default function IsoCoreTrack() {
                             <h4 className="font-medium text-primary text-sm flex items-center gap-2 mb-3">
                               <Zap className="size-4" /> Escopo do Sistema (Sincronizado)
                             </h4>
-                            <p className="text-sm bg-background/50 p-2 rounded border border-primary/10">
+                            <p className="text-sm bg-background/50 p-3 rounded border border-primary/10">
                               {profile.escopoGestao}
                             </p>
                           </div>
