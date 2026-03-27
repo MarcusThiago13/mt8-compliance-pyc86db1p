@@ -1,7 +1,8 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { useTenant, TenantNature } from '@/contexts/TenantContext'
+import { useTenant } from '@/contexts/TenantContext'
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -33,20 +34,42 @@ export default function TenantManagement() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nature: tenant.nature,
-      publicRelationship: tenant.publicRelationship,
-      areas: tenant.areas,
+      nature: tenant?.nature || 'private',
+      publicRelationship: tenant?.publicRelationship || false,
+      areas: tenant?.areas || [],
     },
   })
 
   const watchNature = form.watch('nature')
 
+  // Synchronize form when tenant data loads
+  useEffect(() => {
+    if (tenant) {
+      form.reset({
+        nature: tenant.nature,
+        publicRelationship: tenant.publicRelationship,
+        areas: tenant.areas,
+      })
+    }
+  }, [tenant, form])
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateTenant(values)
+    if (!tenant) return
+
+    // BUG FIXED: We must pass tenant.id as the first argument, and the values as the second.
+    updateTenant(tenant.id, values)
     toast({
       title: 'Configuração Salva',
       description: 'As trilhas foram atualizadas com sucesso. Log de auditoria gerado.',
     })
+  }
+
+  if (!tenant) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <p className="text-muted-foreground animate-pulse">Carregando configurações do tenant...</p>
+      </div>
+    )
   }
 
   const areasList = [
@@ -82,6 +105,7 @@ export default function TenantManagement() {
                       <RadioGroup
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        value={field.value}
                         className="flex flex-col space-y-1 sm:flex-row sm:space-x-4 sm:space-y-0"
                       >
                         <FormItem className="flex items-center space-x-3 space-y-0 border p-4 rounded-md flex-1 cursor-pointer hover:bg-muted/50 transition-colors">

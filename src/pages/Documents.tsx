@@ -6,6 +6,15 @@ import { useTenant } from '@/contexts/TenantContext'
 export default function Documents() {
   const { tenant } = useTenant()
 
+  // Ensure robust null guard so the layout never breaks if tenant is undefined
+  if (!tenant) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <p className="text-muted-foreground animate-pulse">Carregando repositório...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -34,7 +43,7 @@ export default function Documents() {
               Nenhum documento encontrado
             </h3>
             <p className="text-sm text-muted-foreground max-w-sm mb-6">
-              O repositório de <strong>{tenant?.name}</strong> está vazio. Faça o upload do primeiro
+              O repositório de <strong>{tenant.name}</strong> está vazio. Faça o upload do primeiro
               documento para iniciar a gestão de evidências.
             </p>
             <Button className="gap-2" variant="outline">

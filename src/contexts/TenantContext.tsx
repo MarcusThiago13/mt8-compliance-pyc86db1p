@@ -94,7 +94,7 @@ function TenantProviderInner({ children }: { children: ReactNode }) {
         if (data && mounted) {
           const mapped: TenantState[] = data.map((t: any) => ({
             id: t.id,
-            name: t.name,
+            name: t.name || '',
             nature: (t.nature as TenantNature) || 'private',
             publicRelationship: t.public_relationship || false,
             areas: t.areas || [],
@@ -104,7 +104,7 @@ function TenantProviderInner({ children }: { children: ReactNode }) {
           setTenants(mapped)
 
           if (mapped.length > 0) {
-            const asec = mapped.find((m) => m.name.includes('ASEC'))
+            const asec = mapped.find((m) => m.name?.includes('ASEC'))
             setCurrentTenantId((prev) => prev || (asec ? asec.id : mapped[mapped.length - 1].id))
           }
         }
@@ -175,7 +175,10 @@ function TenantProviderInner({ children }: { children: ReactNode }) {
     }
   }
 
-  const updateTenant = async (id: string, updates: Partial<TenantState>) => {
+  // Adding a default empty object to `updates` prevents "Cannot read properties of undefined"
+  const updateTenant = async (id: string, updates: Partial<TenantState> = {}) => {
+    if (!id || !updates) return
+
     try {
       const payload: any = {}
       if (updates.name !== undefined) payload.name = updates.name

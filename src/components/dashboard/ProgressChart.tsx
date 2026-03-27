@@ -1,4 +1,4 @@
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+import { PieChart, Pie, Cell } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
 const data = [
@@ -17,24 +17,27 @@ const chartConfig = {
 export function ProgressChart() {
   return (
     <ChartContainer config={chartConfig} className="h-[200px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={80}
-            paddingAngle={5}
-            dataKey="value"
-          >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <ChartTooltip content={<ChartTooltipContent />} />
-        </PieChart>
-      </ResponsiveContainer>
+      {/*
+        ChartContainer already renders a ResponsiveContainer.
+        We shouldn't nest another ResponsiveContainer inside it 
+        to avoid "width and height are both fixed numbers" warnings.
+      */}
+      <PieChart>
+        <Pie
+          data={data}
+          cx="50%"
+          cy="50%"
+          innerRadius={60}
+          outerRadius={80}
+          paddingAngle={5}
+          dataKey="value"
+        >
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.color} />
+          ))}
+        </Pie>
+        <ChartTooltip content={<ChartTooltipContent />} />
+      </PieChart>
     </ChartContainer>
   )
 }
