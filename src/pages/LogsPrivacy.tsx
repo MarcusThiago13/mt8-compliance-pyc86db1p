@@ -9,44 +9,12 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Eye, ShieldCheck, Database } from 'lucide-react'
-
-const mockLogs = [
-  {
-    id: 'lg-001',
-    time: '2023-10-27 14:32:01',
-    user: 'Admin Sistema',
-    action: 'UPDATE',
-    resource: 'Tenant Config',
-    ip: '192.168.1.1',
-  },
-  {
-    id: 'lg-002',
-    time: '2023-10-27 15:10:45',
-    user: 'João Silva',
-    action: 'READ',
-    resource: 'Dados Sensíveis (Denúncia #8821)',
-    ip: '10.0.0.5',
-  },
-  {
-    id: 'lg-003',
-    time: '2023-10-28 09:15:22',
-    user: 'Maria Souza',
-    action: 'CREATE',
-    resource: 'Upload Evidência (Req 4.1)',
-    ip: '10.0.0.8',
-  },
-  {
-    id: 'lg-004',
-    time: '2023-10-28 11:00:00',
-    user: 'Admin Sistema',
-    action: 'DELETE',
-    resource: 'Usuário Inativo',
-    ip: '192.168.1.1',
-  },
-]
+import { Eye, ShieldCheck, Database, ShieldAlert } from 'lucide-react'
 
 export default function LogsPrivacy() {
+  // Garantia de Zero Dados Fictícios: Removidos todos os mocks (Admin Sistema, João Silva, etc.)
+  const logs: any[] = []
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
@@ -65,7 +33,7 @@ export default function LogsPrivacy() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-slate-900">Ativo</p>
-            <p className="text-xs text-slate-500 mt-1">Contexto atual: t-123</p>
+            <p className="text-xs text-slate-500 mt-1">Contexto dinâmico isolado</p>
           </CardContent>
         </Card>
         <Card className="bg-emerald-50 border-emerald-200 shadow-sm">
@@ -75,8 +43,10 @@ export default function LogsPrivacy() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-emerald-900">Verificada</p>
-            <p className="text-xs text-emerald-600 mt-1">Hash SHA-256 Validado</p>
+            <p className="text-2xl font-bold text-emerald-900">Aguardando Eventos</p>
+            <p className="text-xs text-emerald-600 mt-1">
+              [ a preencher com validação de hash real ]
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -101,37 +71,42 @@ export default function LogsPrivacy() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockLogs.map((log) => (
-                <TableRow key={log.id}>
-                  <TableCell className="font-mono text-xs whitespace-nowrap">{log.time}</TableCell>
-                  <TableCell className="font-medium">{log.user}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={
-                        log.action === 'CREATE'
-                          ? 'text-emerald-600 border-emerald-200'
-                          : log.action === 'DELETE'
-                            ? 'text-red-600 border-red-200'
-                            : log.action === 'UPDATE'
-                              ? 'text-amber-600 border-amber-200'
-                              : 'text-indigo-600 border-indigo-200'
-                      }
-                    >
-                      {log.action}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{log.resource}</TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">
-                    {log.ip}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" title="Ver Diff">
-                      <Eye className="h-4 w-4" />
-                    </Button>
+              {logs.length > 0 ? (
+                logs.map((log) => (
+                  <TableRow key={log.id}>
+                    <TableCell className="font-mono text-xs whitespace-nowrap">
+                      {log.time}
+                    </TableCell>
+                    <TableCell className="font-medium">{log.user}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{log.action}</Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{log.resource}</TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {log.ip}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" title="Ver Diff">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-40 text-center">
+                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                      <ShieldAlert className="h-8 w-8 text-muted-foreground/30 mb-2" />
+                      <p className="font-medium text-foreground">
+                        Nenhum registro de auditoria no período
+                      </p>
+                      <p className="text-xs opacity-70">
+                        [ a preencher com eventos reais do sistema ]
+                      </p>
+                    </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
